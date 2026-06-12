@@ -1,0 +1,76 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Accounts</h1>
+      <p class="subtitle">{{ accounts().length }} account(s) · Total: {{ totalBalance() | currency:'EUR':'symbol':'1.2-2' }}</p>
+    </div>
+    <button class="btn-primary" (click)="showForm.set(true)">+ Add Account</button>
+  </header>
+
+  @if (showForm()) {
+    <div class="modal-overlay" (click)="showForm.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>New Account</h2>
+          <button class="close-btn" (click)="showForm.set(false)">✕</button>
+        </div>
+
+        @if (formError()) {
+          <div class="alert alert-error">{{ formError() }}</div>
+        }
+
+        <form (ngSubmit)="save()">
+          <div class="form-group">
+            <label>Account Name *</label>
+            <input type="text" [(ngModel)]="form.name" name="name" placeholder="e.g. Main Checking" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Initial Balance</label>
+              <input type="number" [(ngModel)]="form.balance" name="balance" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label>Currency *</label>
+              <select [(ngModel)]="form.currency" name="currency">
+                @for (c of currencies; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-ghost" (click)="showForm.set(false)">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : 'Create Account' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><div class="spinner"></div><p>Loading…</p></div>
+  } @else if (accounts().length === 0) {
+    <div class="empty-state">
+      <span>🏦</span>
+      <p>No accounts yet. Add your first account to get started.</p>
+    </div>
+  } @else {
+    <div class="accounts-grid">
+      @for (acc of accounts(); track acc.id) {
+        <div class="account-card">
+          <div class="acc-header">
+            <div class="acc-icon">🏦</div>
+            <button class="icon-btn danger" (click)="delete(acc.id)" title="Delete">🗑</button>
+          </div>
+          <div class="acc-name">{{ acc.name }}</div>
+          <div class="acc-balance">{{ acc.balance | currency:acc.currency:'symbol':'1.2-2' }}</div>
+          <div class="acc-currency-badge">{{ acc.currency }}</div>
+        </div>
+      }
+    </div>
+  }
+</div>

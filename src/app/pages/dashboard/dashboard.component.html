@@ -1,0 +1,125 @@
+<div class="dashboard">
+  <header class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="subtitle">Welcome back, {{ auth.currentUser()?.firstName }}</p>
+    </div>
+    <a routerLink="/transactions" class="btn-primary">+ Add Transaction</a>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your data…</p>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card stat-balance">
+        <div class="stat-icon">💼</div>
+        <div class="stat-info">
+          <span class="stat-label">Total Balance</span>
+          <span class="stat-value">{{ totalBalance() | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="stat-card stat-income">
+        <div class="stat-icon">📈</div>
+        <div class="stat-info">
+          <span class="stat-label">Total Income</span>
+          <span class="stat-value income">{{ totalIncome() | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="stat-card stat-expense">
+        <div class="stat-icon">📉</div>
+        <div class="stat-info">
+          <span class="stat-label">Total Expenses</span>
+          <span class="stat-value expense">{{ totalExpense() | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="stat-card stat-savings">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-info">
+          <span class="stat-label">Net Savings</span>
+          <span class="stat-value" [class.income]="totalIncome() - totalExpense() >= 0" [class.expense]="totalIncome() - totalExpense() < 0">
+            {{ (totalIncome() - totalExpense()) | currency:'EUR':'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <section class="card">
+        <div class="card-header">
+          <h2>Recent Transactions</h2>
+          <a routerLink="/transactions" class="link-more">View all →</a>
+        </div>
+        @if (recentTransactions().length === 0) {
+          <p class="empty-state">No transactions yet.</p>
+        } @else {
+          <div class="transaction-list">
+            @for (tx of recentTransactions(); track tx.id) {
+              <div class="transaction-item">
+                <div class="tx-icon" [style.background]="tx.categoryColor + '22'">
+                  {{ tx.categoryIcon }}
+                </div>
+                <div class="tx-details">
+                  <span class="tx-desc">{{ tx.description }}</span>
+                  <span class="tx-meta">{{ tx.categoryName }} · {{ tx.date | date:'MMM d' }}</span>
+                </div>
+                <span class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
+                  {{ tx.type === 'INCOME' ? '+' : '-' }}{{ tx.amount | currency:'EUR':'symbol':'1.2-2' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Top Expense Categories</h2>
+        </div>
+        @if (expenseByCategory().length === 0) {
+          <p class="empty-state">No expense data yet.</p>
+        } @else {
+          <div class="category-bars">
+            @for (cat of expenseByCategory(); track cat.name) {
+              <div class="cat-row">
+                <div class="cat-label">
+                  <span>{{ cat.icon }}</span>
+                  <span>{{ cat.name }}</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" [style.width]="getBarWidth(cat.total)" [style.background]="cat.color"></div>
+                </div>
+                <span class="cat-amount">{{ cat.total | currency:'EUR':'symbol':'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card accounts-overview">
+        <div class="card-header">
+          <h2>Accounts</h2>
+          <a routerLink="/accounts" class="link-more">Manage →</a>
+        </div>
+        @if (accounts().length === 0) {
+          <p class="empty-state">No accounts added yet.</p>
+        } @else {
+          <div class="account-list">
+            @for (acc of accounts(); track acc.id) {
+              <div class="account-item">
+                <div class="acc-icon">🏦</div>
+                <div class="acc-details">
+                  <span class="acc-name">{{ acc.name }}</span>
+                  <span class="acc-currency">{{ acc.currency }}</span>
+                </div>
+                <span class="acc-balance">{{ acc.balance | currency:acc.currency:'symbol':'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>

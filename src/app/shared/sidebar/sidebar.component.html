@@ -1,0 +1,38 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">💰</span>
+      <span class="logo-text">BudgetTracker</span>
+    </div>
+  </div>
+
+  @if (auth.currentUser(); as user) {
+    <div class="user-info">
+      <div class="avatar">{{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}</div>
+      <div class="user-details">
+        <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+        <span class="user-email">{{ user.email }}</span>
+      </div>
+    </div>
+  }
+
+  <nav class="nav">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="auth.logout()">
+      <span>🚪</span>
+      <span>Logout</span>
+    </button>
+  </div>
+</aside>
