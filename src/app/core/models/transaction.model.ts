@@ -22,6 +22,6 @@ export interface CreateTransactionRequest {
   note: string;
   type: TransactionType;
   date: string;
-  accountId: number;
-  categoryId: number;
+  account: { id: number };
+  category: { id: number };
 }

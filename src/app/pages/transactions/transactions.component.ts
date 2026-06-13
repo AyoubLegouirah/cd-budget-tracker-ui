@@ -83,7 +83,15 @@ export class TransactionsComponent implements OnInit {
     }
     this.saving.set(true);
     this.formError.set('');
-    const req: CreateTransactionRequest = { ...this.form };
+    const req: CreateTransactionRequest = {
+      amount: this.form.amount,
+      description: this.form.description,
+      note: this.form.note,
+      type: this.form.type,
+      date: this.form.date,
+      account: { id: this.form.accountId },
+      category: { id: this.form.categoryId }
+    };
     this.txService.create(req).subscribe({
       next: () => {
         this.showForm.set(false);

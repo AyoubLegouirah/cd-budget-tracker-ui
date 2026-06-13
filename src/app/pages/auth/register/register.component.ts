@@ -31,8 +31,7 @@ export class RegisterComponent {
     this.error.set('');
     this.auth.register({ firstName: this.firstName, lastName: this.lastName, email: this.email, password: this.password }).subscribe({
       next: () => {
-        this.success.set(true);
-        setTimeout(() => this.router.navigate(['/login']), 1500);
+        this.router.navigate(['/dashboard']);
       },
       error: () => {
         this.error.set('Registration failed. Email may already be in use.');
