@@ -120,6 +120,7 @@
 }
 
 .accounts-overview { grid-column: 1 / -1; }
+.chart-wide { grid-column: 1 / -1; }
 
 .card {
   background: var(--card-bg);

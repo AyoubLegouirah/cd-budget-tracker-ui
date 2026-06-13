@@ -32,40 +32,60 @@
       <p>Loading your data…</p>
     </div>
   } @else {
+    <!-- Stats cards from /api/stats/balance -->
     <div class="stats-grid">
       <div class="stat-card stat-balance">
         <div class="stat-icon">💼</div>
         <div class="stat-info">
           <span class="stat-label">Total Balance</span>
-          <span class="stat-value">{{ totalBalance() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          @if (balance()) {
+            <span class="stat-value">{{ (balance()!.totalIncome - balance()!.totalExpense) | currency:'EUR':'symbol':'1.2-2' }}</span>
+          } @else {
+            <span class="stat-value">—</span>
+          }
         </div>
       </div>
       <div class="stat-card stat-income">
         <div class="stat-icon">📈</div>
         <div class="stat-info">
           <span class="stat-label">Total Income</span>
-          <span class="stat-value income">{{ totalIncome() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          @if (balance()) {
+            <span class="stat-value income">{{ balance()!.totalIncome | currency:'EUR':'symbol':'1.2-2' }}</span>
+          } @else {
+            <span class="stat-value">—</span>
+          }
         </div>
       </div>
       <div class="stat-card stat-expense">
         <div class="stat-icon">📉</div>
         <div class="stat-info">
           <span class="stat-label">Total Expenses</span>
-          <span class="stat-value expense">{{ totalExpense() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          @if (balance()) {
+            <span class="stat-value expense">{{ balance()!.totalExpense | currency:'EUR':'symbol':'1.2-2' }}</span>
+          } @else {
+            <span class="stat-value">—</span>
+          }
         </div>
       </div>
       <div class="stat-card stat-savings">
         <div class="stat-icon">🎯</div>
         <div class="stat-info">
           <span class="stat-label">Net Savings</span>
-          <span class="stat-value" [class.income]="totalIncome() - totalExpense() >= 0" [class.expense]="totalIncome() - totalExpense() < 0">
-            {{ (totalIncome() - totalExpense()) | currency:'EUR':'symbol':'1.2-2' }}
-          </span>
+          @if (balance()) {
+            <span class="stat-value"
+              [class.income]="balance()!.netSavings >= 0"
+              [class.expense]="balance()!.netSavings < 0">
+              {{ balance()!.netSavings | currency:'EUR':'symbol':'1.2-2' }}
+            </span>
+          } @else {
+            <span class="stat-value">—</span>
+          }
         </div>
       </div>
     </div>
 
     <div class="dashboard-grid">
+      <!-- Recent transactions -->
       <section class="card">
         <div class="card-header">
           <h2>Recent Transactions</h2>
@@ -93,30 +113,31 @@
         }
       </section>
 
+      <!-- Pie chart: expenses by category -->
       <section class="card">
         <div class="card-header">
           <h2>Top Expense Categories</h2>
         </div>
-        @if (expenseByCategory().length === 0) {
-          <p class="empty-state">No expense data yet.</p>
+        @if (categoryStats().length === 0) {
+          <p class="empty-state">No expense data for this month.</p>
         } @else {
-          <div class="category-bars">
-            @for (cat of expenseByCategory(); track cat.name) {
-              <div class="cat-row">
-                <div class="cat-label">
-                  <span>{{ cat.icon }}</span>
-                  <span>{{ cat.name }}</span>
-                </div>
-                <div class="bar-track">
-                  <div class="bar-fill" [style.width]="getBarWidth(cat.total)" [style.background]="cat.color"></div>
-                </div>
-                <span class="cat-amount">{{ cat.total | currency:'EUR':'symbol':'1.0-0' }}</span>
-              </div>
-            }
-          </div>
+          <app-pie-chart [data]="categoryStats()" />
         }
       </section>
 
+      <!-- Bar chart: monthly income vs expenses -->
+      <section class="card chart-wide">
+        <div class="card-header">
+          <h2>Revenus vs Dépenses — 6 derniers mois</h2>
+        </div>
+        @if (monthlyStats().length === 0) {
+          <p class="empty-state">Pas encore de données mensuelles.</p>
+        } @else {
+          <app-bar-chart [data]="monthlyStats()" />
+        }
+      </section>
+
+      <!-- Accounts overview -->
       <section class="card accounts-overview">
         <div class="card-header">
           <h2>Accounts</h2>
