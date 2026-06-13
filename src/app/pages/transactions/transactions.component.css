@@ -313,6 +313,13 @@ tr.patching td { opacity: 0.6; }
   font-weight: 700;
 }
 
+.page-ellipsis {
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
 .page-info {
   font-size: 0.8rem;
   color: var(--text-muted);

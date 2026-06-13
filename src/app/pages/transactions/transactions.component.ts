@@ -6,7 +6,7 @@ import { AccountService } from '../../core/services/account.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreateTransactionRequest, TransactionType } from '../../core/models/transaction.model';
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 25;
 
 @Component({
   selector: 'app-transactions',
@@ -51,9 +51,21 @@ export class TransactionsComponent implements OnInit {
     return this.sorted().slice(start, start + PAGE_SIZE);
   });
 
-  readonly pageNumbers = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
-  );
+  readonly visiblePages = computed((): (number | null)[] => {
+    const total = this.totalPages();
+    const current = Math.min(this.currentPage(), total);
+    const pages = new Set<number>([1, total]);
+    for (let i = current - 2; i <= current + 2; i++) {
+      if (i >= 1 && i <= total) pages.add(i);
+    }
+    const sorted = Array.from(pages).sort((a, b) => a - b);
+    const result: (number | null)[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push(null);
+      result.push(sorted[i]);
+    }
+    return result;
+  });
 
   form = {
     amount: 0,

@@ -18,4 +18,5 @@ export class SidebarComponent {
     { path: '/categories', label: 'Categories', icon: '🏷️' },
     { path: '/accounts', label: 'Accounts', icon: '🏦' },
   ];
+
 }

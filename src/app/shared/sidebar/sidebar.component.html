@@ -30,6 +30,10 @@
   </nav>
 
   <div class="sidebar-footer">
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item profile-link">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profil</span>
+    </a>
     <button class="logout-btn" (click)="auth.logout()">
       <span>🚪</span>
       <span>Logout</span>

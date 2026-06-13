@@ -183,13 +183,17 @@
           ← Précédent
         </button>
 
-        @for (p of pageNumbers(); track p) {
-          <button
-            class="page-btn page-num"
-            [class.active]="p === currentPage()"
-            (click)="goToPage(p)">
-            {{ p }}
-          </button>
+        @for (item of visiblePages(); track $index) {
+          @if (item === null) {
+            <span class="page-ellipsis">…</span>
+          } @else {
+            <button
+              class="page-btn page-num"
+              [class.active]="item === currentPage()"
+              (click)="goToPage(item)">
+              {{ item }}
+            </button>
+          }
         }
 
         <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
