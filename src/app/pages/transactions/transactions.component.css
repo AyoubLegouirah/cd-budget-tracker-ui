@@ -28,6 +28,14 @@
 
 .filter-group label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
 
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-self: flex-end;
+}
+
 .filter-group select,
 .filter-group input {
   padding: 0.55rem 0.75rem;
@@ -80,6 +88,20 @@
 }
 
 .btn-ghost:hover { background: var(--hover-bg); }
+
+.btn-month {
+  padding: 0.6rem 1.2rem;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-month:hover { background: #dbeafe; }
 
 .modal-overlay {
   position: fixed;
@@ -235,6 +257,67 @@
 
 .icon-btn:hover { opacity: 1; background: var(--hover-bg); }
 .icon-btn.danger:hover { background: var(--danger-light); }
+
+/* Category inline select */
+.td-category { min-width: 160px; }
+
+.cat-select {
+  padding: 0.3rem 0.5rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cat-select:focus { border-color: var(--primary-color); }
+.cat-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+tr.patching td { opacity: 0.6; }
+
+.th-right { text-align: right; }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 0.45rem 0.9rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.page-btn:hover:not(:disabled) { background: var(--hover-bg); border-color: var(--primary-color); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.page-num.active {
+  background: var(--primary-gradient);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.page-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
 
 .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; gap: 1rem; color: var(--text-muted); }
 

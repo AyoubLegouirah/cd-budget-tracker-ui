@@ -6,6 +6,8 @@ import { AccountService } from '../../core/services/account.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreateTransactionRequest, TransactionType } from '../../core/models/transaction.model';
 
+const PAGE_SIZE = 15;
+
 @Component({
   selector: 'app-transactions',
   standalone: true,
@@ -26,10 +28,32 @@ export class TransactionsComponent implements OnInit {
   showForm = signal(false);
   saving = signal(false);
   formError = signal('');
+  patchingIds = signal<Set<number>>(new Set());
 
+  // Filter state
   filterType = signal<string>('ALL');
+  filterCategoryId = signal<number>(0);
   filterFrom = signal('');
   filterTo = signal('');
+
+  // Pagination state
+  currentPage = signal(1);
+
+  readonly sorted = computed(() =>
+    [...this.transactions()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  );
+
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.sorted().length / PAGE_SIZE)));
+
+  readonly paginated = computed(() => {
+    const page = Math.min(this.currentPage(), this.totalPages());
+    const start = (page - 1) * PAGE_SIZE;
+    return this.sorted().slice(start, start + PAGE_SIZE);
+  });
+
+  readonly pageNumbers = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, i) => i + 1)
+  );
 
   form = {
     amount: 0,
@@ -41,14 +65,6 @@ export class TransactionsComponent implements OnInit {
     categoryId: 0
   };
 
-  readonly filtered = computed(() => {
-    let list = [...this.transactions()];
-    if (this.filterType() !== 'ALL') {
-      list = list.filter(t => t.type === this.filterType());
-    }
-    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  });
-
   ngOnInit(): void {
     this.txService.loadAll().subscribe();
     this.accountService.loadAll().subscribe();
@@ -57,22 +73,45 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
-  applyPeriodFilter(): void {
-    if (this.filterFrom() && this.filterTo()) {
-      this.loading.set(true);
-      this.txService.loadByPeriod(this.filterFrom(), this.filterTo()).subscribe({
-        complete: () => this.loading.set(false)
-      });
-    }
+  applyFilters(): void {
+    this.loading.set(true);
+    this.currentPage.set(1);
+    this.txService.loadFiltered({
+      type: this.filterType(),
+      categoryId: this.filterCategoryId() || undefined,
+      from: this.filterFrom() || undefined,
+      to: this.filterTo() || undefined
+    }).subscribe({ complete: () => this.loading.set(false), error: () => this.loading.set(false) });
+  }
+
+  setCurrentMonth(): void {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    this.filterFrom.set(firstDay.toISOString().split('T')[0]);
+    this.filterTo.set(now.toISOString().split('T')[0]);
+    this.applyFilters();
   }
 
   clearFilters(): void {
     this.filterType.set('ALL');
+    this.filterCategoryId.set(0);
     this.filterFrom.set('');
     this.filterTo.set('');
+    this.currentPage.set(1);
     this.loading.set(true);
-    this.txService.loadAll().subscribe({
-      complete: () => this.loading.set(false)
+    this.txService.loadAll().subscribe({ complete: () => this.loading.set(false) });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+  }
+
+  patchCategory(txId: number, categoryId: number): void {
+    this.patchingIds.update(s => new Set([...s, txId]));
+    this.txService.patchCategory(txId, categoryId).subscribe({
+      complete: () => this.patchingIds.update(s => { const n = new Set(s); n.delete(txId); return n; }),
+      error: () => this.patchingIds.update(s => { const n = new Set(s); n.delete(txId); return n; })
     });
   }
 

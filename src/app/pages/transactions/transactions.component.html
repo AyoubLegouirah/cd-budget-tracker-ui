@@ -2,32 +2,50 @@
   <header class="page-header">
     <div>
       <h1>Transactions</h1>
-      <p class="subtitle">{{ filtered().length }} transaction(s)</p>
+      <p class="subtitle">{{ sorted().length }} transaction(s)</p>
     </div>
     <button class="btn-primary" (click)="showForm.set(true)">+ Add Transaction</button>
   </header>
 
+  <!-- Filters -->
   <div class="filters-bar">
     <div class="filter-group">
       <label>Type</label>
-      <select [(ngModel)]="$any(filterType)" (ngModelChange)="filterType.set($event)">
+      <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)">
         <option value="ALL">All</option>
         <option value="INCOME">Income</option>
         <option value="EXPENSE">Expense</option>
       </select>
     </div>
+
+    <div class="filter-group">
+      <label>Category</label>
+      <select [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set(+$event)">
+        <option [value]="0">All categories</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
     <div class="filter-group">
       <label>From</label>
       <input type="date" [ngModel]="filterFrom()" (ngModelChange)="filterFrom.set($event)" />
     </div>
+
     <div class="filter-group">
       <label>To</label>
       <input type="date" [ngModel]="filterTo()" (ngModelChange)="filterTo.set($event)" />
     </div>
-    <button class="btn-secondary" (click)="applyPeriodFilter()">Apply</button>
-    <button class="btn-ghost" (click)="clearFilters()">Clear</button>
+
+    <div class="filter-actions">
+      <button class="btn-secondary" (click)="applyFilters()">Apply</button>
+      <button class="btn-month" (click)="setCurrentMonth()">Ce mois-ci</button>
+      <button class="btn-ghost" (click)="clearFilters()">Clear</button>
+    </div>
   </div>
 
+  <!-- New Transaction Modal -->
   @if (showForm()) {
     <div class="modal-overlay" (click)="showForm.set(false)">
       <div class="modal" (click)="$event.stopPropagation()">
@@ -102,7 +120,7 @@
 
   @if (loading()) {
     <div class="loading-state"><div class="spinner"></div><p>Loading…</p></div>
-  } @else if (filtered().length === 0) {
+  } @else if (sorted().length === 0) {
     <div class="empty-state">
       <span>💸</span>
       <p>No transactions found.</p>
@@ -117,19 +135,29 @@
             <th>Category</th>
             <th>Account</th>
             <th>Type</th>
-            <th>Amount</th>
+            <th class="th-right">Amount</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          @for (tx of filtered(); track tx.id) {
-            <tr>
+          @for (tx of paginated(); track tx.id) {
+            <tr [class.patching]="patchingIds().has(tx.id)">
               <td class="td-date">{{ tx.date | date:'MMM d, y' }}</td>
               <td class="td-desc">
                 <span class="tx-icon" [style.background]="tx.categoryColor + '22'">{{ tx.categoryIcon }}</span>
                 {{ tx.description }}
               </td>
-              <td>{{ tx.categoryName }}</td>
+              <td class="td-category">
+                <select
+                  class="cat-select"
+                  [value]="tx.categoryId"
+                  [disabled]="patchingIds().has(tx.id)"
+                  (change)="patchCategory(tx.id, +$any($event.target).value)">
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+                  }
+                </select>
+              </td>
               <td>{{ tx.accountName }}</td>
               <td>
                 <span class="badge" [class.badge-income]="tx.type === 'INCOME'" [class.badge-expense]="tx.type === 'EXPENSE'">
@@ -147,5 +175,29 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+          ← Précédent
+        </button>
+
+        @for (p of pageNumbers(); track p) {
+          <button
+            class="page-btn page-num"
+            [class.active]="p === currentPage()"
+            (click)="goToPage(p)">
+            {{ p }}
+          </button>
+        }
+
+        <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+          Suivant →
+        </button>
+
+        <span class="page-info">Page {{ currentPage() }} / {{ totalPages() }}</span>
+      </div>
+    }
   }
 </div>
