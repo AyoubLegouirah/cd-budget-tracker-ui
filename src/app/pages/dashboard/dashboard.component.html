@@ -1,10 +1,29 @@
 <div class="dashboard">
+  @if (tinkSuccess()) {
+    <div class="tink-banner tink-banner--success">
+      ✅ Transactions importées avec succès !
+      @if (importedCount() > 0) {
+        <strong>{{ importedCount() }} transaction{{ importedCount() > 1 ? 's' : '' }} importée{{ importedCount() > 1 ? 's' : '' }}.</strong>
+      }
+    </div>
+  }
+  @if (tinkError()) {
+    <div class="tink-banner tink-banner--error">
+      ❌ L'importation a échoué. Veuillez réessayer.
+    </div>
+  }
+
   <header class="page-header">
     <div>
       <h1>Dashboard</h1>
       <p class="subtitle">Welcome back, {{ auth.currentUser()?.firstName }}</p>
     </div>
-    <a routerLink="/transactions" class="btn-primary">+ Add Transaction</a>
+    <div class="header-actions">
+      <button class="btn-bank" (click)="connectBank()" [disabled]="connectingBank()">
+        {{ connectingBank() ? 'Connexion…' : '🏦 Connecter ma banque' }}
+      </button>
+      <a routerLink="/transactions" class="btn-primary">+ Add Transaction</a>
+    </div>
   </header>
 
   @if (loading()) {

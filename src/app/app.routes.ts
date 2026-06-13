@@ -34,5 +34,10 @@ export const routes: Routes = [
       },
     ]
   },
+  {
+    path: 'tink/callback',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/tink/tink-callback.component').then(m => m.TinkCallbackComponent)
+  },
   { path: '**', redirectTo: '/dashboard' }
 ];
