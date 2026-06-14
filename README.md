@@ -1,6 +1,6 @@
 # 💰 Budget Tracker UI
 
-> Frontend Angular 22 d'une application de gestion budgétaire personnelle — tableaux de bord interactifs, suivi des transactions, connexion bancaire open banking via Tink.
+> Angular 22 frontend for a personal budget management app — interactive dashboards, transaction tracking, smart filters, PDF export, and open banking via Tink.
 
 ![Angular](https://img.shields.io/badge/Angular-22-dd0031?style=flat-square&logo=angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat-square&logo=typescript&logoColor=white)
@@ -8,65 +8,75 @@
 
 ---
 
-## Table des matières
+## Table of Contents
 
-- [Fonctionnalités](#fonctionnalités)
-- [Stack technique](#stack-technique)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
-- [Lancer le projet](#lancer-le-projet)
+- [Getting Started](#getting-started)
 - [Screenshots](#screenshots)
 - [Backend](#backend)
 
 ---
 
-## Fonctionnalités
+## Features
 
 ### 📊 Dashboard
-- 4 cartes de synthèse du mois en cours : balance, revenus, dépenses, épargne nette (depuis `/api/stats/balance`)
-- Camembert doughnut des dépenses par catégorie avec couleurs personnalisées (depuis `/api/stats/by-category`)
-- Graphique en barres revenus vs dépenses sur les 6 derniers mois (depuis `/api/stats/monthly`)
-- Liste des 8 transactions les plus récentes
-- Vue d'ensemble des comptes bancaires
+
+- **Month selector** — navigate across months with `←` / `→` arrows; all stats update to the selected month
+- **4 summary cards** — balance, income, expenses, net savings (from `GET /api/stats/balance?month=YYYY-MM`)
+- **Expense pie chart** — doughnut chart with custom category colours + progress bar list showing amount and percentage per category (from `GET /api/stats/by-category?month=YYYY-MM`)
+- **Monthly bar chart** — grouped income vs expenses over the last 6 months (from `GET /api/stats/monthly`), always fixed regardless of the month selector
+- **Recurring subscriptions** — auto-detected recurring transactions (Netflix, rent, salary…) with category icon, frequency badge, monthly amount in green (income) or red (expense), and a monthly total (from `GET /api/transactions/recurring`)
+- **PDF export** — one-click monthly report for the selected month; triggers `GET /api/reports/monthly?month=YYYY-MM` and downloads `bilan-YYYY-MM.pdf` with a spinner during generation
+- **Recent transactions** — last 10 transactions with category icon and amount
+- **Accounts overview** — summary of all bank accounts
 
 ### 💸 Transactions
-- Tableau paginé — 25 transactions par page, pagination intelligente (`1 … 4 5 [6] 7 8 … 248`)
-- Filtres combinés serveur-side : type (Income / Expense), catégorie, période From/To
-- Raccourci "Ce mois-ci" pour pré-remplir les dates du mois en cours
-- Modification de catégorie inline — dropdown par ligne, appel `PATCH /api/transactions/{id}/category` sans rechargement
-- Création de transaction via formulaire modal
-- Suppression avec confirmation
 
-### 🏷️ Catégories
-- CRUD complet des catégories avec icône et couleur personnalisées
+- **Paginated table** — 25 transactions per page with smart pagination (`1 … 4 5 [6] 7 8 … 248`)
+- **Combined server-side filters** — type (Income / Expense / All), category, date range From/To
+- **"This month" shortcut** — pre-fills From/To with the current calendar month
+- **Inline category edit** — dropdown per row, calls `PATCH /api/transactions/{id}/category` without a full reload
+- **Create transaction** — modal form with account, category, type, amount, date, note
+- **Delete** with confirmation dialog
 
-### 🏦 Comptes
-- Gestion des comptes bancaires (nom, devise, solde)
+### 🏷️ Categories
 
-### 🏦 Connexion bancaire Tink
-- Intégration open banking via Tink Link
-- Importation automatique des transactions depuis la banque
-- Callback de retour avec bannière de confirmation
+- Full CRUD with custom emoji icon and hex colour picker
+- Categories are shared across transactions, budgets, and stats
 
-### 👤 Profil
-- Affichage des informations utilisateur (depuis `/api/users/me`)
-- Modification du prénom et du nom avec mise à jour immédiate de la sidebar
-- Changement de mot de passe (champ actuel + nouveau + confirmation)
-- Messages de succès / erreur auto-effaçants
+### 🏦 Accounts
+
+- Manage bank accounts (name, currency, balance)
+
+### 🏦 Open Banking — Tink
+
+- Open banking integration via Tink Link
+- Automatic transaction import from your bank
+- Return callback with success/error banner and imported count
+
+### 👤 Profile
+
+- Display user info (from `GET /api/users/me`)
+- Edit first name and last name — sidebar avatar updates instantly
+- Change password (current + new + confirm)
+- Auto-dismissing success / error messages
 
 ---
 
-## Stack technique
+## Tech Stack
 
-| Couche | Technologie |
+| Layer | Technology |
 |---|---|
 | Framework | [Angular 22](https://angular.dev) — standalone components, zoneless |
-| Langage | TypeScript 6.0 |
-| État | Angular Signals (`signal`, `computed`) |
-| Graphiques | [Chart.js 4.5](https://www.chartjs.org) — natif, sans wrapper |
-| Styles | CSS classique (variables CSS, pas de framework UI) |
-| HTTP | `HttpClient` avec intercepteur JWT automatique |
-| Routage | Angular Router — lazy loading par page |
-| Authentification | JWT stocké en localStorage, guard sur toutes les routes protégées |
+| Language | TypeScript 6.0 |
+| State | Angular Signals (`signal`, `computed`) |
+| Charts | [Chart.js 4.5](https://www.chartjs.org) — native, no wrapper |
+| Styles | Plain CSS (CSS variables, no UI framework) |
+| HTTP | `HttpClient` with automatic JWT interceptor |
+| Routing | Angular Router — lazy-loaded pages |
+| Auth | JWT stored in localStorage, guard on all protected routes |
 
 ---
 
@@ -76,68 +86,72 @@
 src/app/
 ├── core/
 │   ├── guards/
-│   │   └── auth.guard.ts          # Redirige vers /login si non authentifié
+│   │   └── auth.guard.ts             # Redirects to /login if unauthenticated
 │   ├── interceptors/
-│   │   └── jwt.interceptor.ts     # Injecte Bearer token sur toutes les requêtes
+│   │   └── jwt.interceptor.ts        # Injects Bearer token on every request
 │   ├── models/
 │   │   ├── user.model.ts
-│   │   ├── transaction.model.ts
+│   │   ├── transaction.model.ts      # Transaction, RecurringTransaction, PagedResponse
 │   │   ├── category.model.ts
 │   │   ├── account.model.ts
-│   │   └── stats.model.ts
+│   │   ├── stats.model.ts            # BalanceStat, CategoryStat, MonthlyStat
+│   │   └── budget.model.ts           # Budget, BudgetSummary, CreateBudgetRequest
 │   └── services/
-│       ├── auth.service.ts        # Login, register, logout, currentUser signal
-│       ├── user.service.ts        # GET/PUT /api/users/me
-│       ├── transaction.service.ts # CRUD + loadFiltered + patchCategory
-│       ├── category.service.ts    # CRUD catégories
-│       ├── account.service.ts     # CRUD comptes
-│       ├── stats.service.ts       # balance, by-category, monthly
-│       └── tink.service.ts        # URL de connexion Tink
+│       ├── auth.service.ts           # Login, register, logout, currentUser signal
+│       ├── user.service.ts           # GET/PUT /api/users/me
+│       ├── transaction.service.ts    # CRUD + loadFiltered + patchCategory + getRecurring
+│       ├── category.service.ts       # CRUD categories
+│       ├── account.service.ts        # CRUD accounts
+│       ├── stats.service.ts          # balance, by-category, monthly (month param)
+│       ├── budget.service.ts         # CRUD budgets + getSummary(month)
+│       ├── report.service.ts         # downloadMonthlyReport(month) → Blob
+│       └── tink.service.ts           # Tink connect URL
 │
 ├── layout/
-│   └── layout.component.ts        # Shell : sidebar + <router-outlet>
+│   └── layout.component.ts          # Shell: sidebar + <router-outlet>
 │
 ├── shared/
 │   ├── sidebar/
-│   │   └── sidebar.component.*    # Navigation + lien profil + logout
+│   │   └── sidebar.component.*      # Nav links + profile + logout
 │   └── charts/
-│       ├── pie-chart.component.ts  # Doughnut Chart.js
-│       └── bar-chart.component.ts  # Barres groupées Chart.js
+│       ├── pie-chart.component.ts   # Doughnut — Chart.js
+│       └── bar-chart.component.ts   # Grouped bars — Chart.js
 │
 └── pages/
     ├── auth/
     │   ├── login/
     │   └── register/
-    ├── dashboard/                  # Stats + graphiques + transactions récentes
-    ├── transactions/               # Tableau filtré + paginé
+    ├── dashboard/                   # Stats + charts + recurring + PDF export
+    ├── transactions/                # Filtered, paginated table + inline edits
     ├── categories/
     ├── accounts/
-    ├── profile/                    # Infos personnelles + mot de passe
+    ├── budgets/                     # Monthly budget limits with progress bars
+    ├── profile/                     # Personal info + password change
     └── tink/
         └── tink-callback.component.ts
 ```
 
-### Flux de données (Signals)
+### Data flow (Signals)
 
 ```
-Service (signal privé) ──► composant.readonly signal ──► template (réactif)
-         ▲
-    HTTP + tap()
+Service (private signal) ──► component.readonly signal ──► template (reactive)
+          ▲
+     HTTP + tap()
 ```
 
-Chaque service expose un signal readonly. Les composants ne modifient jamais l'état directement — ils passent par les méthodes du service qui mettent à jour le signal via `tap()`.
+Each service exposes a readonly signal. Components never mutate state directly — they call service methods that update the signal via `tap()`. Derived values use `computed()`.
 
 ---
 
-## Lancer le projet
+## Getting Started
 
-### Prérequis
+### Prerequisites
 
 - Node.js 20+
 - npm 10+
-- [Budget Tracker API](https://github.com/your-username/budget-tracker-api) lancée sur `http://localhost:8080`
+- [Budget Tracker API](https://github.com/your-username/budget-tracker-api) running on `http://localhost:8080`
 
-### Installation
+### Install
 
 ```bash
 git clone https://github.com/your-username/budget-tracker-ui.git
@@ -145,106 +159,84 @@ cd budget-tracker-ui
 npm install
 ```
 
-### Développement
+### Development server
 
 ```bash
 ng serve
 # → http://localhost:4200
 ```
 
-### Build production
+### Production build
 
 ```bash
 ng build
-# Output dans dist/budget-tracker-ui/
+# Output in dist/budget-tracker-ui/
 ```
 
 ---
 
 ## Screenshots
 
-### Dashboard
-```
-┌─────────────────────────────────────────────────────────────┐
-│  💼 Balance      📈 Revenus     📉 Dépenses    🎯 Épargne   │
-│  €2 340,00       €3 200,00      €860,00         €2 340,00   │
-├─────────────────────────────┬───────────────────────────────┤
-│  Transactions récentes      │  Dépenses par catégorie       │
-│  ─────────────────────────  │  ┌────────────────────────┐   │
-│  🍔 Burger King  -€12,50    │  │   [Camembert Chart.js] │   │
-│  💊 Pharmacie    -€8,00     │  │  🍔 Nourriture  42%    │   │
-│  💼 Salaire      +€2 800    │  │  🚗 Transport   28%    │   │
-│  ...                        │  └────────────────────────┘   │
-├─────────────────────────────┴───────────────────────────────┤
-│  Revenus vs Dépenses — 6 derniers mois [Graphique barres]   │
-│  Jan   Fév   Mar   Avr   Mai   Juin                         │
-└─────────────────────────────────────────────────────────────┘
-```
+### Dashboard — Stats & Charts
+
+![Dashboard](docs/screenshots/dashboard-stats.png)
+
+### Dashboard — Recurring Subscriptions
+
+![Dashboard Subscriptions](docs/screenshots/dashboard-abonnements.png)
 
 ### Transactions
-```
-┌──────────────────────────────────────────────────────────────┐
-│  Filtres : [Type ▾] [Catégorie ▾] [From] [To]               │
-│            [Apply] [Ce mois-ci] [Clear]                      │
-├───────────┬──────────────────┬───────────┬───────┬──────────┤
-│  Date     │  Description     │  Catégorie│  Type │  Montant │
-├───────────┼──────────────────┼───────────┼───────┼──────────┤
-│  Jun 13   │  🍔 Burger King  │  [Nourriture ▾]   │  -€12,50 │
-│  Jun 12   │  💊 Pharmacie    │  [Santé ▾]        │  -€8,00  │
-│  Jun 10   │  💼 Salaire      │  [Revenus ▾]      │  +€2 800 │
-├───────────┴──────────────────┴───────────┴───────┴──────────┤
-│  ← Précédent   1 … 3 4 [5] 6 7 … 42   Suivant →            │
-│                              Page 5 / 42                     │
-└──────────────────────────────────────────────────────────────┘
-```
 
-### Profil
-```
-┌─────────────────────────────────────────────────────────────┐
-│  AL  Ayoub Legouirah                                        │
-│      ayoubgrand060900@gmail.com                             │
-├──────────────────────────┬──────────────────────────────────┤
-│  ✏️ Infos personnelles   │  🔒 Changer le mot de passe      │
-│  ──────────────────────  │  ────────────────────────────    │
-│  Prénom  [Ayoub       ]  │  Actuel    [••••••••      👁️]   │
-│  Nom     [Legouirah   ]  │  Nouveau   [••••••••      👁️]   │
-│  Email   [••••• (lock)]  │  Confirmer [••••••••      👁️]   │
-│             [Enregistrer]│           [Modifier le mdp]      │
-└──────────────────────────┴──────────────────────────────────┘
-```
+![Transactions](docs/screenshots/transactions.png)
+
+### Categories
+
+![Categories](docs/screenshots/categories.png)
+
+### Profile
+
+![Profile](docs/screenshots/profil.png)
 
 ---
 
 ## Backend
 
-Le frontend consomme l'API REST Spring Boot 4 disponible ici :
+This frontend consumes the Spring Boot 4 REST API:
 
 **→ [budget-tracker-api](https://github.com/your-username/budget-tracker-api)**
 
-L'API tourne par défaut sur `http://localhost:8080`. Pour changer l'URL de base, remplacez `http://localhost:8080` dans les services (`core/services/`).
+The API runs on `http://localhost:8080` by default. To change the base URL, replace `http://localhost:8080` in every service file under `core/services/`.
 
-### Endpoints principaux
+### API Endpoints
 
-| Méthode | Endpoint | Description |
+| Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/auth/login` | Authentification |
-| `POST` | `/api/auth/register` | Inscription |
-| `GET` | `/api/users/me` | Profil utilisateur |
-| `PUT` | `/api/users/me` | Modifier prénom/nom |
-| `PUT` | `/api/users/me/password` | Changer mot de passe |
-| `GET` | `/api/transactions` | Transactions (filtres via query params) |
-| `POST` | `/api/transactions` | Créer une transaction |
-| `PATCH` | `/api/transactions/{id}/category` | Changer la catégorie |
-| `DELETE` | `/api/transactions/{id}` | Supprimer |
-| `GET` | `/api/stats/balance` | Synthèse du mois |
-| `GET` | `/api/stats/by-category` | Dépenses par catégorie |
-| `GET` | `/api/stats/monthly` | Historique 6 mois |
-| `GET` | `/api/categories` | Liste des catégories |
-| `GET` | `/api/accounts` | Liste des comptes |
-| `GET` | `/api/tink/connect-url` | URL Tink Link |
+| `POST` | `/api/auth/login` | Authenticate |
+| `POST` | `/api/auth/register` | Register |
+| `GET` | `/api/users/me` | Get current user |
+| `PUT` | `/api/users/me` | Update name |
+| `PUT` | `/api/users/me/password` | Change password |
+| `GET` | `/api/transactions` | List transactions (paginated, filterable) |
+| `POST` | `/api/transactions` | Create transaction |
+| `PATCH` | `/api/transactions/{id}/category` | Update category inline |
+| `DELETE` | `/api/transactions/{id}` | Delete transaction |
+| `GET` | `/api/transactions/recurring` | Detect recurring transactions |
+| `GET` | `/api/stats/balance` | Monthly balance summary (`?month=YYYY-MM`) |
+| `GET` | `/api/stats/by-category` | Expenses by category (`?month=YYYY-MM`) |
+| `GET` | `/api/stats/monthly` | 6-month income vs expenses history |
+| `GET` | `/api/budgets` | List budgets |
+| `POST` | `/api/budgets` | Create budget |
+| `DELETE` | `/api/budgets/{id}` | Delete budget |
+| `GET` | `/api/budgets/summary` | Budget progress (`?month=YYYY-MM`) |
+| `GET` | `/api/reports/monthly` | Generate PDF report (`?month=YYYY-MM`) |
+| `GET` | `/api/categories` | List categories |
+| `POST` | `/api/categories` | Create category |
+| `DELETE` | `/api/categories/{id}` | Delete category |
+| `GET` | `/api/accounts` | List accounts |
+| `GET` | `/api/tink/connect-url` | Tink Link connect URL |
 
 ---
 
-## Licence
+## License
 
 MIT
