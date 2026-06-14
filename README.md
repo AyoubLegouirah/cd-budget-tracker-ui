@@ -177,25 +177,7 @@ ng build
 
 ## Screenshots
 
-### Dashboard — Stats & Charts
-
-![Dashboard](docs/screenshots/dashboard-stats.png)
-
-### Dashboard — Recurring Subscriptions
-
-![Dashboard Subscriptions](docs/screenshots/dashboard-abonnements.png)
-
-### Transactions
-
-![Transactions](docs/screenshots/transactions.png)
-
-### Categories
-
-![Categories](docs/screenshots/categories.png)
-
-### Profile
-
-![Profile](docs/screenshots/profil.png)
+> Screenshots available in `docs/screenshots/`.
 
 ---
 
