@@ -1,5 +1,12 @@
 export type TransactionType = 'INCOME' | 'EXPENSE';
 
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 export interface Transaction {
   id: number;
   amount: number;

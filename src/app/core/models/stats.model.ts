@@ -1,5 +1,6 @@
 export interface CategoryStat {
   categoryName: string;
+  icon?: string;
   color: string;
   total: number;
 }

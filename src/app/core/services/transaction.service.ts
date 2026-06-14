@@ -1,8 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { Transaction, CreateTransactionRequest } from '../models/transaction.model';
+import { Transaction, CreateTransactionRequest, PagedResponse } from '../models/transaction.model';
 
 export interface TransactionFilter {
   type?: string;
@@ -19,19 +19,22 @@ export class TransactionService {
   readonly transactions = this._transactions.asReadonly();
 
   loadAll(): Observable<Transaction[]> {
-    return this.http.get<Transaction[]>('http://localhost:8080/api/transactions').pipe(
+    return this.http.get<PagedResponse<Transaction>>('http://localhost:8080/api/transactions').pipe(
+      map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   loadByType(type: 'INCOME' | 'EXPENSE'): Observable<Transaction[]> {
-    return this.http.get<Transaction[]>(`http://localhost:8080/api/transactions/type/${type}`).pipe(
+    return this.http.get<PagedResponse<Transaction>>(`http://localhost:8080/api/transactions/type/${type}`).pipe(
+      map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   loadByPeriod(from: string, to: string): Observable<Transaction[]> {
-    return this.http.get<Transaction[]>(`http://localhost:8080/api/transactions/period?from=${from}&to=${to}`).pipe(
+    return this.http.get<PagedResponse<Transaction>>(`http://localhost:8080/api/transactions/period?from=${from}&to=${to}`).pipe(
+      map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
@@ -48,7 +51,8 @@ export class TransactionService {
     if (filter.categoryId) params = params.set('categoryId', String(filter.categoryId));
     if (filter.from) params = params.set('from', filter.from);
     if (filter.to) params = params.set('to', filter.to);
-    return this.http.get<Transaction[]>('http://localhost:8080/api/transactions', { params }).pipe(
+    return this.http.get<PagedResponse<Transaction>>('http://localhost:8080/api/transactions', { params }).pipe(
+      map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }

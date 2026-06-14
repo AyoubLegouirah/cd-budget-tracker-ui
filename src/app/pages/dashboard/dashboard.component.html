@@ -122,6 +122,30 @@
           <p class="empty-state">No expense data for this month.</p>
         } @else {
           <app-pie-chart [data]="categoryStats()" />
+          <div class="category-bars">
+            @for (stat of categoryStats(); track stat.categoryName) {
+              <div class="cat-row">
+                <div class="cat-label">
+                  @if (stat.icon) {
+                    <span class="cat-icon" [style.background]="stat.color + '22'">{{ stat.icon }}</span>
+                  } @else {
+                    <span class="cat-dot" [style.background]="stat.color"></span>
+                  }
+                  <span class="cat-name">{{ stat.categoryName }}</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill"
+                    [style.width.%]="totalCategoryExpense() > 0 ? (stat.total / totalCategoryExpense() * 100) : 0"
+                    [style.background]="stat.color">
+                  </div>
+                </div>
+                <div class="cat-stat">
+                  <span class="cat-amount">{{ stat.total | currency:'EUR':'symbol':'1.0-0' }}</span>
+                  <span class="cat-pct">{{ totalCategoryExpense() > 0 ? (stat.total / totalCategoryExpense() * 100 | number:'1.0-0') : 0 }}%</span>
+                </div>
+              </div>
+            }
+          </div>
         }
       </section>
 

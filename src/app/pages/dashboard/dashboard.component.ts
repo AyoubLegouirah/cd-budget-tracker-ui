@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AccountService } from '../../core/services/account.service';
@@ -14,7 +14,7 @@ import { BarChartComponent } from '../../shared/charts/bar-chart.component';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, RouterLink, PieChartComponent, BarChartComponent],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink, PieChartComponent, BarChartComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -40,10 +40,14 @@ export class DashboardComponent implements OnInit {
   categoryStats = signal<CategoryStat[]>([]);
   monthlyStats = signal<MonthlyStat[]>([]);
 
+  readonly totalCategoryExpense = computed(() =>
+    this.categoryStats().reduce((sum, s) => sum + s.total, 0)
+  );
+
   readonly recentTransactions = computed(() =>
     [...this.transactions()]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 8)
+      .slice(0, 10)
   );
 
   ngOnInit(): void {
