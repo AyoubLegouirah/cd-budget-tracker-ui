@@ -32,6 +32,24 @@
       <p>Loading your data…</p>
     </div>
   } @else {
+    <!-- Month selector + PDF export -->
+    <div class="month-nav">
+      <button class="month-btn" (click)="prevMonth()" aria-label="Mois précédent">&#8592;</button>
+      <span class="month-label">{{ selectedMonthLabel() }}</span>
+      <button class="month-btn" (click)="nextMonth()" [disabled]="isCurrentMonth()" aria-label="Mois suivant">&#8594;</button>
+      <button class="btn-export" (click)="exportPdf()" [disabled]="exportLoading()">
+        @if (exportLoading()) {
+          <span class="export-spinner"></span>
+        } @else {
+          <span>📄</span>
+        }
+        Exporter PDF
+      </button>
+      @if (exportError()) {
+        <span class="export-error">{{ exportError() }}</span>
+      }
+    </div>
+
     <!-- Stats cards from /api/stats/balance -->
     <div class="stats-grid">
       <div class="stat-card stat-balance">

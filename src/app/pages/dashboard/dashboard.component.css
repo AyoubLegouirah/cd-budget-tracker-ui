@@ -84,6 +84,80 @@
 
 .btn-primary:hover { opacity: 0.9; }
 
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.month-btn {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--border-color);
+  background: var(--card-bg);
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.month-btn:hover:not(:disabled) { background: var(--bg-secondary); border-color: var(--primary-color); }
+.month-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.month-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 140px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s, border-color 0.15s;
+  margin-left: 0.5rem;
+}
+
+.btn-export:hover:not(:disabled) { background: var(--bg-secondary); border-color: var(--primary-color); }
+.btn-export:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.export-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.export-error {
+  font-size: 0.8rem;
+  color: var(--danger-color);
+  font-weight: 500;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

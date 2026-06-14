@@ -7,8 +7,8 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
 import { TinkService } from '../../core/services/tink.service';
 import { StatsService } from '../../core/services/stats.service';
+import { ReportService } from '../../core/services/report.service';
 import { BalanceStat, CategoryStat, MonthlyStat } from '../../core/models/stats.model';
-import { RecurringTransaction } from '../../core/models/transaction.model';
 import { PieChartComponent } from '../../shared/charts/pie-chart.component';
 import { BarChartComponent } from '../../shared/charts/bar-chart.component';
 
@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly txService = inject(TransactionService);
   private readonly statsService = inject(StatsService);
+  private readonly reportService = inject(ReportService);
   private readonly tinkService = inject(TinkService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -36,6 +37,19 @@ export class DashboardComponent implements OnInit {
   tinkError = signal(false);
   importedCount = signal(0);
   connectingBank = signal(false);
+  exportLoading = signal(false);
+  exportError = signal('');
+
+  readonly selectedMonth = signal(DashboardComponent.currentYearMonth());
+
+  readonly selectedMonthLabel = computed(() => {
+    const [y, m] = this.selectedMonth().split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  });
+
+  readonly isCurrentMonth = computed(() =>
+    this.selectedMonth() === DashboardComponent.currentYearMonth()
+  );
 
   balance = signal<BalanceStat | null>(null);
   categoryStats = signal<CategoryStat[]>([]);
@@ -107,11 +121,53 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  prevMonth(): void {
+    const [y, m] = this.selectedMonth().split('-').map(Number);
+    this.selectedMonth.set(DashboardComponent.toYearMonth(new Date(y, m - 2, 1)));
+    this.exportError.set('');
+  }
+
+  nextMonth(): void {
+    if (this.isCurrentMonth()) return;
+    const [y, m] = this.selectedMonth().split('-').map(Number);
+    this.selectedMonth.set(DashboardComponent.toYearMonth(new Date(y, m, 1)));
+    this.exportError.set('');
+  }
+
+  exportPdf(): void {
+    this.exportLoading.set(true);
+    this.exportError.set('');
+    const month = this.selectedMonth();
+    this.reportService.downloadMonthlyReport(month).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bilan-${month}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exportLoading.set(false);
+      },
+      error: () => {
+        this.exportError.set('Erreur lors de la génération du PDF');
+        this.exportLoading.set(false);
+      }
+    });
+  }
+
   connectBank(): void {
     this.connectingBank.set(true);
     this.tinkService.getConnectUrl().subscribe({
       next: res => { window.location.href = res.url; },
       error: () => this.connectingBank.set(false)
     });
+  }
+
+  private static currentYearMonth(): string {
+    return DashboardComponent.toYearMonth(new Date());
+  }
+
+  private static toYearMonth(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   }
 }
