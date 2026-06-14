@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { Transaction, CreateTransactionRequest, PagedResponse } from '../models/transaction.model';
+import { Transaction, CreateTransactionRequest, PagedResponse, RecurringTransaction } from '../models/transaction.model';
 
 export interface TransactionFilter {
   type?: string;
@@ -17,6 +17,15 @@ export class TransactionService {
 
   private _transactions = signal<Transaction[]>([]);
   readonly transactions = this._transactions.asReadonly();
+
+  private _recurring = signal<RecurringTransaction[]>([]);
+  readonly recurring = this._recurring.asReadonly();
+
+  getRecurring(): Observable<RecurringTransaction[]> {
+    return this.http.get<RecurringTransaction[]>('http://localhost:8080/api/transactions/recurring').pipe(
+      tap(data => this._recurring.set(data))
+    );
+  }
 
   loadAll(): Observable<Transaction[]> {
     return this.http.get<PagedResponse<Transaction>>('http://localhost:8080/api/transactions').pipe(

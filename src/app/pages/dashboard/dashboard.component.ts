@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TinkService } from '../../core/services/tink.service';
 import { StatsService } from '../../core/services/stats.service';
 import { BalanceStat, CategoryStat, MonthlyStat } from '../../core/models/stats.model';
+import { RecurringTransaction } from '../../core/models/transaction.model';
 import { PieChartComponent } from '../../shared/charts/pie-chart.component';
 import { BarChartComponent } from '../../shared/charts/bar-chart.component';
 
@@ -40,6 +41,21 @@ export class DashboardComponent implements OnInit {
   categoryStats = signal<CategoryStat[]>([]);
   monthlyStats = signal<MonthlyStat[]>([]);
 
+  readonly recurringTransactions = this.txService.recurring;
+
+  readonly totalMonthlyRecurring = computed(() =>
+    this.recurringTransactions()
+      .filter(r => r.type === 'EXPENSE')
+      .reduce((sum, r) => sum + (r.monthlyAmount ?? r.amount), 0)
+  );
+
+  readonly recurringTotalLabel = computed(() => {
+    const list = this.recurringTransactions();
+    const hasIncome = list.some(r => r.type === 'INCOME');
+    const hasExpense = list.some(r => r.type === 'EXPENSE');
+    return hasIncome && hasExpense ? 'Balance récurrente' : 'Total abonnements';
+  });
+
   readonly totalCategoryExpense = computed(() =>
     this.categoryStats().reduce((sum, s) => sum + s.total, 0)
   );
@@ -49,6 +65,18 @@ export class DashboardComponent implements OnInit {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 10)
   );
+
+  private readonly frequencyLabels: Record<string, string> = {
+    WEEKLY: 'Hebdomadaire',
+    BIWEEKLY: 'Bi-mensuel',
+    MONTHLY: 'Mensuel',
+    QUARTERLY: 'Trimestriel',
+    YEARLY: 'Annuel',
+  };
+
+  frequencyLabel(freq: string): string {
+    return this.frequencyLabels[freq] ?? freq;
+  }
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -66,7 +94,8 @@ export class DashboardComponent implements OnInit {
       transactions: this.txService.loadAll(),
       balance: this.statsService.getBalance(),
       categories: this.statsService.getByCategory(),
-      monthly: this.statsService.getMonthly()
+      monthly: this.statsService.getMonthly(),
+      recurring: this.txService.getRecurring(),
     }).subscribe({
       next: res => {
         this.balance.set(res.balance);

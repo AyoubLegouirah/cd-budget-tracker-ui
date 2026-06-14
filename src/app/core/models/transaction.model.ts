@@ -23,6 +23,22 @@ export interface Transaction {
   createdAt: string;
 }
 
+export type RecurringFrequency = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+
+export interface RecurringTransaction {
+  id: number;
+  description: string;
+  amount: number;
+  monthlyAmount: number;
+  type: TransactionType;
+  categoryId: number;
+  categoryName: string;
+  categoryIcon: string;
+  categoryColor: string;
+  frequency: RecurringFrequency;
+  lastDate: string;
+}
+
 export interface CreateTransactionRequest {
   amount: number;
   description: string;

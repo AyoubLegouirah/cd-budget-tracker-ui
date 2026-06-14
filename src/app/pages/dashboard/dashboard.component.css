@@ -297,6 +297,101 @@
 
 .empty-state { color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 2rem 0; }
 
+/* Recurring transactions */
+.recurring-list { display: flex; flex-direction: column; }
+
+.recurring-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.recurring-row:last-child { border-bottom: none; }
+
+.recurring-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.recurring-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.recurring-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recurring-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 180px;
+  text-align: center;
+}
+
+.recurring-amount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 110px;
+  text-align: right;
+}
+
+.recurring-amount.income { color: var(--success-color); }
+.recurring-amount.expense { color: var(--danger-color); }
+
+.recurring-see-all {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.recurring-see-all:hover { text-decoration: underline; }
+
+.recurring-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 0 0;
+  margin-top: 0.5rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.recurring-total-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.recurring-total-amount {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--danger-color);
+}
+
 @media (max-width: 900px) {
   .dashboard-grid { grid-template-columns: 1fr; }
   .accounts-overview { grid-column: auto; }

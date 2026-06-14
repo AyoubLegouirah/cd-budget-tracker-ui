@@ -161,6 +161,42 @@
         }
       </section>
 
+      <!-- Recurring transactions -->
+      <section class="card chart-wide">
+        <div class="card-header">
+          <h2>Abonnements &amp; Récurrents</h2>
+        </div>
+        @if (recurringTransactions().length === 0) {
+          <p class="empty-state">Aucun abonnement détecté.</p>
+        } @else {
+          <div class="recurring-list">
+            @for (r of recurringTransactions().slice(0, 10); track r.id) {
+              <div class="recurring-row">
+                <div class="recurring-left">
+                  <span class="recurring-icon" [style.background]="r.categoryColor + '22'">{{ r.categoryIcon }}</span>
+                  <span class="recurring-name">{{ r.description }}</span>
+                </div>
+                <span class="recurring-meta">{{ r.categoryName }} · {{ frequencyLabel(r.frequency) }}</span>
+                <span class="recurring-amount"
+                  [class.income]="r.type === 'INCOME'"
+                  [class.expense]="r.type === 'EXPENSE'">
+                  {{ r.type === 'INCOME' ? '+' : '-' }}{{ (r.monthlyAmount ?? r.amount) | currency:'EUR':'symbol':'1.2-2' }}/mois
+                </span>
+              </div>
+            }
+          </div>
+          @if (recurringTransactions().length > 10) {
+            <a routerLink="/transactions" class="recurring-see-all">
+              Voir tout ({{ recurringTransactions().length }}) →
+            </a>
+          }
+          <div class="recurring-total">
+            <span class="recurring-total-label">{{ recurringTotalLabel() }}</span>
+            <span class="recurring-total-amount">-{{ totalMonthlyRecurring() | currency:'EUR':'symbol':'1.2-2' }}/mois</span>
+          </div>
+        }
+      </section>
+
       <!-- Accounts overview -->
       <section class="card accounts-overview">
         <div class="card-header">
