@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TinkService } from '../../core/services/tink.service';
 import { StatsService } from '../../core/services/stats.service';
 import { ReportService } from '../../core/services/report.service';
-import { BalanceStat, CategoryStat, MonthlyStat } from '../../core/models/stats.model';
+import { BalanceStat, CategoryStat, MonthlyStat, ForecastStat } from '../../core/models/stats.model';
 import { PieChartComponent } from '../../shared/charts/pie-chart.component';
 import { BarChartComponent } from '../../shared/charts/bar-chart.component';
 
@@ -20,6 +20,10 @@ import { BarChartComponent } from '../../shared/charts/bar-chart.component';
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+
+  constructor() {
+    effect(() => this.loadForecast(this.selectedMonth()));
+  }
   private readonly accountService = inject(AccountService);
   private readonly txService = inject(TransactionService);
   private readonly statsService = inject(StatsService);
@@ -54,6 +58,23 @@ export class DashboardComponent implements OnInit {
   balance = signal<BalanceStat | null>(null);
   categoryStats = signal<CategoryStat[]>([]);
   monthlyStats = signal<MonthlyStat[]>([]);
+  forecast = signal<ForecastStat | null>(null);
+  forecastLoading = signal(false);
+
+  readonly projectedTotalIsWarning = computed(() => {
+    const f = this.forecast();
+    if (!f || f.totalIncome <= 0) return false;
+    const ratio = f.projectedTotal / f.totalIncome;
+    return ratio > 0.8 && ratio <= 1.0;
+  });
+
+  readonly projectedTotalIsDanger = computed(() => {
+    const f = this.forecast();
+    if (!f || f.totalIncome <= 0) return false;
+    return f.projectedTotal > f.totalIncome;
+  });
+
+  readonly projectedSavingsIsPositive = computed(() => (this.forecast()?.projectedSavings ?? 0) >= 0);
 
   readonly recurringTransactions = this.txService.recurring;
 
@@ -160,6 +181,20 @@ export class DashboardComponent implements OnInit {
     this.tinkService.getConnectUrl().subscribe({
       next: res => { window.location.href = res.url; },
       error: () => this.connectingBank.set(false)
+    });
+  }
+
+  private loadForecast(month: string): void {
+    this.forecastLoading.set(true);
+    this.statsService.getForecast(month).subscribe({
+      next: data => {
+        this.forecast.set(data);
+        this.forecastLoading.set(false);
+      },
+      error: () => {
+        this.forecast.set(null);
+        this.forecastLoading.set(false);
+      }
     });
   }
 

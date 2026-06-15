@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CategoryStat, MonthlyStat, BalanceStat } from '../models/stats.model';
+import { CategoryStat, MonthlyStat, BalanceStat, ForecastStat } from '../models/stats.model';
 import { environment } from '../../../environments/environment';
 
 const BASE = `${environment.apiUrl}/api/stats`;
@@ -20,5 +20,9 @@ export class StatsService {
 
   getMonthly(): Observable<MonthlyStat[]> {
     return this.http.get<MonthlyStat[]>(`${BASE}/monthly`);
+  }
+
+  getForecast(month: string): Observable<ForecastStat> {
+    return this.http.get<ForecastStat>(`${BASE}/forecast`, { params: { month } });
   }
 }

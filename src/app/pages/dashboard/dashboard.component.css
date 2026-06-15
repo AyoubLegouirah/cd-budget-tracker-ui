@@ -466,6 +466,89 @@
   color: var(--danger-color);
 }
 
+/* Spending forecast */
+.forecast-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 3rem;
+  margin-bottom: 1.25rem;
+}
+
+.forecast-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.forecast-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.forecast-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.forecast-progress-track {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.forecast-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), #818cf8);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.forecast-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.forecast-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.forecast-total-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forecast-total-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.forecast-total-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.forecast-total-value.forecast-orange { color: #f97316; }
+.forecast-total-value.forecast-red { color: var(--danger-color); }
+.forecast-total-value.forecast-green { color: var(--success-color); }
+
+.forecast-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
 @media (max-width: 900px) {
   .dashboard-grid { grid-template-columns: 1fr; }
   .accounts-overview { grid-column: auto; }

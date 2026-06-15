@@ -179,6 +179,59 @@
         }
       </section>
 
+      <!-- Spending forecast -->
+      <section class="card chart-wide">
+        <div class="card-header">
+          <h2>📊 Prévision de dépenses — {{ selectedMonthLabel() }}</h2>
+        </div>
+        @if (forecastLoading()) {
+          <div class="forecast-loading"><div class="spinner"></div></div>
+        } @else if (!forecast()) {
+          <p class="empty-state">Pas de données de prévision disponibles.</p>
+        } @else {
+          <div class="forecast-grid">
+            <div class="forecast-item">
+              <span class="forecast-label">Dépensé jusqu'ici</span>
+              <span class="forecast-value">{{ forecast()!.totalSpentSoFar | currency:'EUR':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="forecast-item">
+              <span class="forecast-label">Jours écoulés</span>
+              <span class="forecast-value">{{ forecast()!.daysElapsed }}/{{ forecast()!.totalDaysInMonth }}</span>
+            </div>
+            <div class="forecast-item">
+              <span class="forecast-label">Rythme quotidien</span>
+              <span class="forecast-value">{{ forecast()!.dailyRate | currency:'EUR':'symbol':'1.0-0' }}/jour</span>
+            </div>
+            <div class="forecast-item">
+              <span class="forecast-label">Mois écoulé</span>
+              <span class="forecast-value">{{ forecast()!.percentageOfMonthElapsed | number:'1.1-1' }}%</span>
+            </div>
+          </div>
+          <div class="forecast-progress-track">
+            <div class="forecast-progress-fill" [style.width.%]="forecast()!.percentageOfMonthElapsed"></div>
+          </div>
+          <div class="forecast-divider"></div>
+          <div class="forecast-totals">
+            <div class="forecast-total-item">
+              <span class="forecast-total-label">Prévision fin de mois</span>
+              <span class="forecast-total-value"
+                [class.forecast-orange]="projectedTotalIsWarning()"
+                [class.forecast-red]="projectedTotalIsDanger()">
+                ~{{ forecast()!.projectedTotal | currency:'EUR':'symbol':'1.0-0' }}
+              </span>
+            </div>
+            <div class="forecast-total-item">
+              <span class="forecast-total-label">Épargne prévue</span>
+              <span class="forecast-total-value"
+                [class.forecast-green]="projectedSavingsIsPositive()"
+                [class.forecast-red]="!projectedSavingsIsPositive()">
+                ~{{ forecast()!.projectedSavings | currency:'EUR':'symbol':'1.0-0' }}
+              </span>
+            </div>
+          </div>
+        }
+      </section>
+
       <!-- Recurring transactions -->
       <section class="card chart-wide">
         <div class="card-header">

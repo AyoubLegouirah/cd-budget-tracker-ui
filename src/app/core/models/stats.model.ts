@@ -17,3 +17,14 @@ export interface BalanceStat {
   netSavings: number;
   transactionCount: number;
 }
+
+export interface ForecastStat {
+  totalSpentSoFar: number;
+  daysElapsed: number;
+  totalDaysInMonth: number;
+  dailyRate: number;
+  percentageOfMonthElapsed: number;
+  projectedTotal: number;
+  projectedSavings: number;
+  totalIncome: number;
+}
