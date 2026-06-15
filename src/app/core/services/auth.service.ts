@@ -11,17 +11,10 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
-  private _token = signal<string | null>(this.loadTokenFromStorage());
   private _currentUser = signal<User | null>(this.loadUserFromStorage());
 
-  readonly token = this._token.asReadonly();
   readonly currentUser = this._currentUser.asReadonly();
-  readonly isAuthenticated = computed(() => this._token() !== null);
-
-  private loadTokenFromStorage(): string | null {
-    const raw = localStorage.getItem('token');
-    return raw && raw !== 'null' && raw !== 'undefined' ? raw : null;
-  }
+  readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
   private loadUserFromStorage(): User | null {
     const stored = localStorage.getItem('user');
@@ -31,10 +24,8 @@ export class AuthService {
   login(req: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, req).pipe(
       tap(res => {
-        localStorage.setItem('token', res.token);
         const user: User = { userId: res.userId, email: res.email, firstName: res.firstName, lastName: res.lastName };
         localStorage.setItem('user', JSON.stringify(user));
-        this._token.set(res.token);
         this._currentUser.set(user);
       })
     );
@@ -43,10 +34,8 @@ export class AuthService {
   register(req: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, req).pipe(
       tap(res => {
-        localStorage.setItem('token', res.token);
         const user: User = { userId: res.userId, email: res.email, firstName: res.firstName, lastName: res.lastName };
         localStorage.setItem('user', JSON.stringify(user));
-        this._token.set(res.token);
         this._currentUser.set(user);
       })
     );
@@ -58,9 +47,14 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    this.http.post(`${environment.apiUrl}/api/auth/logout`, {}).subscribe({
+      complete: () => this.clearSession(),
+      error: () => this.clearSession()
+    });
+  }
+
+  private clearSession(): void {
     localStorage.removeItem('user');
-    this._token.set(null);
     this._currentUser.set(null);
     this.router.navigate(['/login']);
   }
