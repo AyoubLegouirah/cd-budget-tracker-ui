@@ -27,6 +27,7 @@
 - **4 summary cards** — balance, income, expenses, net savings (from `GET /api/stats/balance?month=YYYY-MM`)
 - **Expense pie chart** — doughnut chart with custom category colours + progress bar list showing amount and percentage per category (from `GET /api/stats/by-category?month=YYYY-MM`)
 - **Monthly bar chart** — grouped income vs expenses over the last 6 months (from `GET /api/stats/monthly`), always fixed regardless of the month selector
+- **Spending forecast** — projected end-of-month spend and savings for the selected month (from `GET /api/stats/forecast?month=YYYY-MM`); shows amount spent so far, days elapsed, daily burn rate, month-elapsed progress bar, projected total (orange >80% of income, red >100%), and projected savings (green if positive, red if negative); updates reactively when the month selector changes
 - **Recurring subscriptions** — auto-detected recurring transactions (Netflix, rent, salary…) with category icon, frequency badge, monthly amount in green (income) or red (expense), and a monthly total (from `GET /api/transactions/recurring`)
 - **PDF export** — one-click monthly report for the selected month; triggers `GET /api/reports/monthly?month=YYYY-MM` and downloads `bilan-YYYY-MM.pdf` with a spinner during generation
 - **Recent transactions** — last 10 transactions with category icon and amount
@@ -237,6 +238,7 @@ export const environment = {
 | `GET` | `/api/stats/balance` | Monthly balance summary (`?month=YYYY-MM`) |
 | `GET` | `/api/stats/by-category` | Expenses by category (`?month=YYYY-MM`) |
 | `GET` | `/api/stats/monthly` | 6-month income vs expenses history |
+| `GET` | `/api/stats/forecast` | Spending forecast for selected month (`?month=YYYY-MM`) |
 | `GET` | `/api/budgets` | List budgets |
 | `POST` | `/api/budgets` | Create budget |
 | `DELETE` | `/api/budgets/{id}` | Delete budget |
