@@ -35,6 +35,7 @@
 ### 💸 Transactions
 
 - **Paginated table** — 25 transactions per page with smart pagination (`1 … 4 5 [6] 7 8 … 248`)
+- **Real-time search** — search bar filters transactions by description with a 300 ms debounce
 - **Combined server-side filters** — type (Income / Expense / All), category, date range From/To
 - **"This month" shortcut** — pre-fills From/To with the current calendar month
 - **Inline category edit** — dropdown per row, calls `PATCH /api/transactions/{id}/category` without a full reload
@@ -65,6 +66,15 @@
 
 ---
 
+## Security
+
+- **httpOnly cookie authentication** — the JWT is stored in an httpOnly cookie set by the server, never accessible via JavaScript. This eliminates the XSS risk of localStorage-based token storage.
+- **`withCredentials: true`** — the JWT interceptor attaches this flag to every HTTP request so the browser automatically sends the auth cookie without any manual token handling.
+- **Centralised API URL** — the backend base URL is declared once in `src/environments/environment.ts`, not scattered across service files.
+- **`POST /api/auth/logout`** — logout calls the backend endpoint to invalidate the server-side session before clearing local state, preventing dangling tokens.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -74,9 +84,10 @@
 | State | Angular Signals (`signal`, `computed`) |
 | Charts | [Chart.js 4.5](https://www.chartjs.org) — native, no wrapper |
 | Styles | Plain CSS (CSS variables, no UI framework) |
-| HTTP | `HttpClient` with automatic JWT interceptor |
+| HTTP | `HttpClient` with `withCredentials: true` interceptor — cookies sent automatically |
 | Routing | Angular Router — lazy-loaded pages |
-| Auth | JWT stored in localStorage, guard on all protected routes |
+| Auth | httpOnly cookie-based JWT — no token in localStorage, guard on all protected routes |
+| Config | API base URL centralised in `environment.ts` |
 
 ---
 
@@ -88,7 +99,7 @@ src/app/
 │   ├── guards/
 │   │   └── auth.guard.ts             # Redirects to /login if unauthenticated
 │   ├── interceptors/
-│   │   └── jwt.interceptor.ts        # Injects Bearer token on every request
+│   │   └── jwt.interceptor.ts        # Adds withCredentials: true to every request (httpOnly cookie auth)
 │   ├── models/
 │   │   ├── user.model.ts
 │   │   ├── transaction.model.ts      # Transaction, RecurringTransaction, PagedResponse
@@ -97,7 +108,7 @@ src/app/
 │   │   ├── stats.model.ts            # BalanceStat, CategoryStat, MonthlyStat
 │   │   └── budget.model.ts           # Budget, BudgetSummary, CreateBudgetRequest
 │   └── services/
-│       ├── auth.service.ts           # Login, register, logout, currentUser signal
+│       ├── auth.service.ts           # Login, register, logout (calls /api/auth/logout), currentUser signal
 │       ├── user.service.ts           # GET/PUT /api/users/me
 │       ├── transaction.service.ts    # CRUD + loadFiltered + patchCategory + getRecurring
 │       ├── category.service.ts       # CRUD categories
@@ -149,7 +160,7 @@ Each service exposes a readonly signal. Components never mutate state directly �
 
 - Node.js 20+
 - npm 10+
-- [Budget Tracker API](https://github.com/your-username/budget-tracker-api) running on `http://localhost:8080`
+- [Budget Tracker API](https://github.com/your-username/budget-tracker-api) running on `http://localhost:8080` (configurable via `src/environments/environment.ts`)
 
 ### Install
 
@@ -200,14 +211,21 @@ This frontend consumes the Spring Boot 4 REST API:
 
 **→ [budget-tracker-api](https://github.com/your-username/budget-tracker-api)**
 
-The API runs on `http://localhost:8080` by default. To change the base URL, replace `http://localhost:8080` in every service file under `core/services/`.
+The API runs on `http://localhost:8080` by default. To change the base URL, edit `src/environments/environment.ts`:
+
+```ts
+export const environment = {
+  apiUrl: 'http://localhost:8080'
+};
+```
 
 ### API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/auth/login` | Authenticate |
-| `POST` | `/api/auth/register` | Register |
+| `POST` | `/api/auth/login` | Authenticate (sets httpOnly cookie) |
+| `POST` | `/api/auth/register` | Register (sets httpOnly cookie) |
+| `POST` | `/api/auth/logout` | Invalidate session and clear cookie |
 | `GET` | `/api/users/me` | Get current user |
 | `PUT` | `/api/users/me` | Update name |
 | `PUT` | `/api/users/me/password` | Change password |
