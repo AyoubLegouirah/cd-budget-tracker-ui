@@ -3,12 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Transaction, CreateTransactionRequest, PagedResponse, RecurringTransaction } from '../models/transaction.model';
+import { environment } from '../../../environments/environment';
 
 export interface TransactionFilter {
   type?: string;
   categoryId?: number;
   from?: string;
   to?: string;
+  search?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,34 +24,34 @@ export class TransactionService {
   readonly recurring = this._recurring.asReadonly();
 
   getRecurring(): Observable<RecurringTransaction[]> {
-    return this.http.get<RecurringTransaction[]>('http://localhost:8080/api/transactions/recurring').pipe(
+    return this.http.get<RecurringTransaction[]>(`${environment.apiUrl}/api/transactions/recurring`).pipe(
       tap(data => this._recurring.set(data))
     );
   }
 
   loadAll(): Observable<Transaction[]> {
-    return this.http.get<PagedResponse<Transaction>>('http://localhost:8080/api/transactions').pipe(
+    return this.http.get<PagedResponse<Transaction>>(`${environment.apiUrl}/api/transactions`).pipe(
       map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   loadByType(type: 'INCOME' | 'EXPENSE'): Observable<Transaction[]> {
-    return this.http.get<PagedResponse<Transaction>>(`http://localhost:8080/api/transactions/type/${type}`).pipe(
+    return this.http.get<PagedResponse<Transaction>>(`${environment.apiUrl}/api/transactions/type/${type}`).pipe(
       map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   loadByPeriod(from: string, to: string): Observable<Transaction[]> {
-    return this.http.get<PagedResponse<Transaction>>(`http://localhost:8080/api/transactions/period?from=${from}&to=${to}`).pipe(
+    return this.http.get<PagedResponse<Transaction>>(`${environment.apiUrl}/api/transactions/period?from=${from}&to=${to}`).pipe(
       map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   create(req: CreateTransactionRequest): Observable<Transaction> {
-    return this.http.post<Transaction>('http://localhost:8080/api/transactions', req).pipe(
+    return this.http.post<Transaction>(`${environment.apiUrl}/api/transactions`, req).pipe(
       tap(tx => this._transactions.update(list => [tx, ...list]))
     );
   }
@@ -60,20 +62,21 @@ export class TransactionService {
     if (filter.categoryId) params = params.set('categoryId', String(filter.categoryId));
     if (filter.from) params = params.set('from', filter.from);
     if (filter.to) params = params.set('to', filter.to);
-    return this.http.get<PagedResponse<Transaction>>('http://localhost:8080/api/transactions', { params }).pipe(
+    if (filter.search) params = params.set('search', filter.search);
+    return this.http.get<PagedResponse<Transaction>>(`${environment.apiUrl}/api/transactions`, { params }).pipe(
       map(res => res.content),
       tap(data => this._transactions.set(data))
     );
   }
 
   patchCategory(id: number, categoryId: number): Observable<Transaction> {
-    return this.http.patch<Transaction>(`http://localhost:8080/api/transactions/${id}/category`, { categoryId }).pipe(
+    return this.http.patch<Transaction>(`${environment.apiUrl}/api/transactions/${id}/category`, { categoryId }).pipe(
       tap(updated => this._transactions.update(list => list.map(t => t.id === id ? updated : t)))
     );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`http://localhost:8080/api/transactions/${id}`).pipe(
+    return this.http.delete<void>(`${environment.apiUrl}/api/transactions/${id}`).pipe(
       tap(() => this._transactions.update(list => list.filter(t => t.id !== id)))
     );
   }

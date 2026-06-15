@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
   }
 
   login(req: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('http://localhost:8080/api/auth/login', req).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, req).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
         const user: User = { userId: res.userId, email: res.email, firstName: res.firstName, lastName: res.lastName };
@@ -40,7 +41,7 @@ export class AuthService {
   }
 
   register(req: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('http://localhost:8080/api/auth/register', req).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, req).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
         const user: User = { userId: res.userId, email: res.email, firstName: res.firstName, lastName: res.lastName };

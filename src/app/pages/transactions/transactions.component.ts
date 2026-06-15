@@ -1,6 +1,9 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AccountService } from '../../core/services/account.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -19,6 +22,8 @@ export class TransactionsComponent implements OnInit {
   private readonly txService = inject(TransactionService);
   private readonly accountService = inject(AccountService);
   private readonly categoryService = inject(CategoryService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly searchSubject = new Subject<string>();
 
   readonly transactions = this.txService.transactions;
   readonly accounts = this.accountService.accounts;
@@ -31,6 +36,7 @@ export class TransactionsComponent implements OnInit {
   patchingIds = signal<Set<number>>(new Set());
 
   // Filter state
+  filterSearch = signal('');
   filterType = signal<string>('ALL');
   filterCategoryId = signal<number>(0);
   filterFrom = signal('');
@@ -77,6 +83,19 @@ export class TransactionsComponent implements OnInit {
     categoryId: 0
   };
 
+  constructor() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => this.applyFilters());
+  }
+
+  onSearchInput(val: string): void {
+    this.filterSearch.set(val);
+    this.currentPage.set(1);
+    this.searchSubject.next(val);
+  }
+
   ngOnInit(): void {
     this.txService.loadAll().subscribe();
     this.accountService.loadAll().subscribe();
@@ -92,7 +111,8 @@ export class TransactionsComponent implements OnInit {
       type: this.filterType(),
       categoryId: this.filterCategoryId() || undefined,
       from: this.filterFrom() || undefined,
-      to: this.filterTo() || undefined
+      to: this.filterTo() || undefined,
+      search: this.filterSearch() || undefined
     }).subscribe({ complete: () => this.loading.set(false), error: () => this.loading.set(false) });
   }
 
@@ -105,6 +125,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   clearFilters(): void {
+    this.filterSearch.set('');
     this.filterType.set('ALL');
     this.filterCategoryId.set(0);
     this.filterFrom.set('');

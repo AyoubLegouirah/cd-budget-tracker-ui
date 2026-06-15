@@ -7,6 +7,21 @@
     <button class="btn-primary" (click)="showForm.set(true)">+ Add Transaction</button>
   </header>
 
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Rechercher une transaction..."
+      [value]="filterSearch()"
+      (input)="onSearchInput($any($event.target).value)"
+    />
+    @if (filterSearch()) {
+      <button class="search-clear" (click)="onSearchInput('')" aria-label="Effacer la recherche">✕</button>
+    }
+  </div>
+
   <!-- Filters -->
   <div class="filters-bar">
     <div class="filter-group">

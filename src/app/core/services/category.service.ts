@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Category, CreateCategoryRequest } from '../models/category.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
@@ -12,19 +13,19 @@ export class CategoryService {
   readonly categories = this._categories.asReadonly();
 
   loadAll(): Observable<Category[]> {
-    return this.http.get<Category[]>('http://localhost:8080/api/categories').pipe(
+    return this.http.get<Category[]>(`${environment.apiUrl}/api/categories`).pipe(
       tap(data => this._categories.set(data))
     );
   }
 
   create(req: CreateCategoryRequest): Observable<Category> {
-    return this.http.post<Category>('http://localhost:8080/api/categories', req).pipe(
+    return this.http.post<Category>(`${environment.apiUrl}/api/categories`, req).pipe(
       tap(cat => this._categories.update(list => [...list, cat]))
     );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`http://localhost:8080/api/categories/${id}`).pipe(
+    return this.http.delete<void>(`${environment.apiUrl}/api/categories/${id}`).pipe(
       tap(() => this._categories.update(list => list.filter(c => c.id !== id)))
     );
   }
